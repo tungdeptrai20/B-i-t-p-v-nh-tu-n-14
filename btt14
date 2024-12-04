@@ -1,0 +1,153 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+
+struct Node {
+    char data;          
+    Node* left;         
+    Node* right;        
+    
+   
+    Node(char value) {
+        data = value;
+        left = right = nullptr;
+    }
+};
+
+class ExpressionTree {
+private:
+    Node* root;
+
+    
+    bool isOperator(char c) {
+        return (c == '+' || c == '-' || c == '*' || c == '/');
+    }
+
+    
+    void inorderTraversal(Node* node) {
+        if (node != nullptr) {
+            if (isOperator(node->data)) cout << "(";
+            inorderTraversal(node->left);
+            cout << node->data;
+            inorderTraversal(node->right);
+            if (isOperator(node->data)) cout << ")";
+        }
+    }
+
+    void preorderTraversal(Node* node) {
+        if (node != nullptr) {
+            cout << node->data << " ";
+            preorderTraversal(node->left);
+            preorderTraversal(node->right);
+        }
+    }
+
+    void postorderTraversal(Node* node) {
+        if (node != nullptr) {
+            postorderTraversal(node->left);
+            postorderTraversal(node->right);
+            cout << node->data << " ";
+        }
+    }
+
+public:
+    // Constructor
+    ExpressionTree() {
+        root = nullptr;
+    }
+
+   
+    bool isEmpty() {
+        return root == nullptr;
+    }
+
+    
+    Node* createNode(char value) {
+        return new Node(value);
+    }
+
+    
+    void buildFromPostfix(string postfix) {
+        Node* stack[100];
+        int top = -1;
+
+        for (char c : postfix) {
+            Node* newNode = createNode(c);
+
+            if (!isOperator(c)) {
+                stack[++top] = newNode;
+            } else {
+                newNode->right = stack[top--];
+                newNode->left = stack[top--];
+                stack[++top] = newNode;
+            }
+        }
+        root = stack[top];
+    }
+
+   
+    void addChild(char parentValue, char childValue, bool isLeft) {
+        Node* newNode = createNode(childValue);
+        
+        if (isEmpty()) {
+            root = newNode;
+            return;
+        }
+
+        
+        Node* current = root;
+        Node* parent = nullptr;
+        while (current != nullptr) {
+            if (current->data == parentValue) {
+                parent = current;
+                break;
+            }
+            if (current->left) current = current->left;
+            else if (current->right) current = current->right;
+            else break;
+        }
+
+        if (parent != nullptr) {
+            if (isLeft && parent->left == nullptr)
+                parent->left = newNode;
+            else if (!isLeft && parent->right == nullptr)
+                parent->right = newNode;
+        }
+    }
+
+   
+    void inorder() {
+        cout << "Duyệt trung tố: ";
+        inorderTraversal(root);
+        cout << endl;
+    }
+
+    void preorder() {
+        cout << "Duyệt tiền tố: ";
+        preorderTraversal(root);
+        cout << endl;
+    }
+
+    void postorder() {
+        cout << "Duyệt hậu tố: ";
+        postorderTraversal(root);
+        cout << endl;
+    }
+};
+
+
+int main() {
+    ExpressionTree tree;
+    
+   
+    string postfix = "ab+c*";
+    tree.buildFromPostfix(postfix);
+
+    
+    tree.inorder();   
+    tree.preorder();  
+    tree.postorder(); 
+
+    return 0;
+}
